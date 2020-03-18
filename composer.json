@@ -1,0 +1,8 @@
+{
+    "name": "Doctrine PGSQL",
+    "version": "1.0.0",
+
+    "require": {
+        "doctrine/dbal": "^2.10"
+    }
+}
