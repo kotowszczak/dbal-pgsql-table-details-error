@@ -22,7 +22,7 @@ class UsersTable {
     protected $tableName = 'user_Users';
 
     /**
-     * Schema name in which table should be created
+     * Schema name in which table should be created if Database platform supprt Schemas
      *
      * @var string
      */
@@ -38,7 +38,7 @@ class UsersTable {
 
     public function getTableName($quoted = false)
     {
-        $tableName = (($this->schemaName) ? $this->schemaName . '.' : '') . $this->tableName;
+        $tableName = ($this->schemaName && $this->platform->supportsSchemas() ? $this->schemaName . '.' : '') . $this->tableName;
 
         return ($quoted) ? $this->quote($tableName) : $tableName;
     }
@@ -75,20 +75,26 @@ class UsersTable {
 
         $tableCreateSql = $schema->toSql($this->conn->getDatabasePlatform()); // get queries to create this schema.
 
+        $commitTranscation = true;
+
         $this->conn->beginTransaction();
 
         foreach ($tableCreateSql as $sql) {
             try {
                 $this->conn->query($sql);
             } catch (\Exception $ex) {
+                $commitTranscation = false;
+
                 $this->conn->rollBack();
 
                 $this->pr($ex->getMessage());
+
             }
         }
 
-        $this->conn->commit();
-
+        if ($commitTranscation) {
+            $this->conn->commit();
+        }
     }
 
     /**
@@ -97,7 +103,7 @@ class UsersTable {
      */
     protected function prepare($schema)
     {
-        $usersTable = $schema->createTable($this->quote($this->tableName));
+        $usersTable = $schema->createTable($this->getTableName(true));
 
         $usersTable->addColumn($this->quote("user_ID"), "integer", array("unsigned" => true));
         $usersTable->addColumn($this->quote("user_Login"), "string", array("length" => 32));
@@ -118,11 +124,14 @@ class UsersTable {
     }
 
     /**
+     * Method which retrive Table Details
      *
+     * @param boolean $quote
+     * @return \Doctrine\DBAL\Schema\Table
      */
-    public function details()
+    public function details($quote = false)
     {
-        return $this->conn->getSchemaManager()->listTableDetails($this->getTableName(false));
+        return $this->conn->getSchemaManager()->listTableDetails($this->getTableName($quote));
     }
 
     public static function pr($data)
