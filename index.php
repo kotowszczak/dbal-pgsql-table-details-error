@@ -11,7 +11,7 @@ $conn = \Doctrine\DBAL\DriverManager::getConnection([
     'user' => DB_USER,
     'password' => DB_PASS,
     'port' => DB_PORT,
-    'driver' => 'pdo_pgsql',
+    'driver' => DB_DRIVER,
 ]);
 
 $usersTable = new UsersTable($conn);

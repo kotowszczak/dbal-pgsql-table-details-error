@@ -114,8 +114,6 @@ class UsersTable {
 
         $usersTable->setComment('Some comment');
 
-        $schema->createSequence($this->quote("user_Users_table_user_ID_seq"));
-
         return $usersTable;
     }
 
@@ -124,7 +122,7 @@ class UsersTable {
      */
     public function details()
     {
-        return $this->conn->getSchemaManager()->listTableDetails($this->getTableName(true));
+        return $this->conn->getSchemaManager()->listTableDetails($this->getTableName(false));
     }
 
     public static function pr($data)
